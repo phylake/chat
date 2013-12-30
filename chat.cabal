@@ -1,0 +1,33 @@
+name:                chat
+version:             0.1.0.0
+synopsis:            redis-backed chat server
+-- description:         
+license:             BSD3
+license-file:        LICENSE
+author:              Brandon Cook
+maintainer:          phylake@gmail.com
+-- copyright:           
+category:            Web
+build-type:          Simple
+-- extra-source-files:  
+cabal-version:       >=1.10
+
+executable chat
+  main-is:             chat.hs
+  -- other-modules:       
+  -- other-extensions:    
+  build-depends:       base >=4.6 && <4.7
+                     , blaze-builder ==0.3.*
+                     , bytestring ==0.*
+                     , conduit ==1.*
+                     , hedis ==0.6.*
+                     , http-types ==0.8.*
+                     , SHA ==1.6.*
+                     , text ==1.*
+                     , time ==1.4.*
+                     , transformers ==0.3.*
+                     , vector ==0.10.*
+                     , wai ==2.*
+                     , warp ==2.*
+  -- hs-source-dirs:      
+  default-language:    Haskell2010

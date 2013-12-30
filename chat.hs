@@ -29,7 +29,6 @@ import           Network.HTTP.Types.Status (status500)
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           System.Environment
-import           System.Locale
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Lazy.Char8 as BLC
@@ -131,9 +130,9 @@ noRedis :: Application
 noRedis req = return builderNoLen
 
 --res :: (Monad m) => Status -> ReponseHeaders -> Builder -> m Response
-res s h b = return $ ResponseBuilder s h b
+res s h b = return $ responseBuilder s h b
 
-builderNoLen = ResponseBuilder
+builderNoLen = responseBuilder
     status200
     [ ("Content-Type", "text/plain")
     ]
