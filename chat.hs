@@ -24,8 +24,7 @@ import           Data.Vector as DV hiding ((++), map)
 import           Data.Word
 import           Database.Redis as R
 import           Debug.Trace
-import           Network.HTTP.Types (status200)
-import           Network.HTTP.Types.Status (status500)
+import           Network.HTTP.Types.Status (status500, status200)
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           System.Environment
