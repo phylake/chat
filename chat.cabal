@@ -22,6 +22,7 @@ executable chat
                      , conduit ==1.*
                      , hedis ==0.6.*
                      , http-types ==0.8.*
+                     , mtl
                      , SHA ==1.6.*
                      , text ==1.*
                      , time ==1.4.*
