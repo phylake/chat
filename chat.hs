@@ -24,17 +24,24 @@ import           Data.Vector as DV hiding ((++), map)
 import           Data.Word
 import           Database.Redis as R
 import           Debug.Trace
+import           GHC.IO.Handle
+import           GHC.IO.Handle.FD
 import           Network.HTTP.Types.Status (status500, status200)
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           System.Environment
+import           Util.Integral
+import           Util.Misc
+import           Util.Time
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Lazy.Char8 as BLC
 import qualified Data.Conduit as C
 import qualified Data.Conduit.List as CL
 
-t = main
+pStdOut = hPutStr stdout
+pStdErr = hPutStr stderr
+dbg = pStdOut
 
 redisInstances :: Int
 redisInstances = 128
@@ -42,23 +49,13 @@ redisInstances = 128
 p :: String -> C.ResourceT IO ()
 p = liftIO . putStrLn
 
-infinity :: Double
-infinity = read "Infinity"
-
-ninfinity :: Double
-ninfinity = read "-Infinity"
-
 newline :: BC.ByteString
 newline = BC.singleton '\n'
 
-epochNow :: IO Double
-epochNow = getCurrentTime >>= utcToEpoch where
-  utcToEpoch :: UTCTime -> IO Double
-  utcToEpoch = return . fromIntegral . round . utcTimeToPOSIXSeconds
-
+t = main
 main :: IO ()
 main = do
-  putStrLn "starting chat"
+  pStdOut "starting chat"
   connsPerInstance:_ <- getArgs
   conns <- generateM redisInstances $
            \i -> connect defaultConnectInfo {
@@ -68,7 +65,7 @@ main = do
   run 3001 $ app $ preShardRedis conns
   --run 3001 noRedis
 
---preShardRedis :: Vector R.Connection -> BLC.ByteString -> Redis a -> IO a
+preShardRedis :: Vector R.Connection -> BLC.ByteString -> Redis a -> IO a
 preShardRedis conns bs = runRedis conn
 {-preShardRedis conns bs cmd = do
   putStrLn $ "shard " ++ show shard
@@ -82,17 +79,17 @@ preShardRedis conns bs = runRedis conn
 
 connLostH :: ConnectionLostException -> IO (Either Reply [BC.ByteString])
 connLostH e = do
-  putStrLn $ "CAUGHT " ++ show e
+  pStdErr $ "CAUGHT " ++ show e
   return $ Left $ Error BC.empty
 
 ioH :: IOException -> IO (Either Reply [BC.ByteString])
 ioH e = do
-  putStrLn $ "CAUGHT " ++ show e
+  pStdErr $ "CAUGHT " ++ show e
   return $ Left $ Error BC.empty
 
 someH :: SomeException -> IO (Either Reply [BC.ByteString])
 someH e = do
-  putStrLn $ "CAUGHT " ++ show e
+  pStdErr $ "CAUGHT " ++ show e
   return $ Left $ Error BC.empty
 
 handlers :: [Handler (Either Reply [BC.ByteString])]
@@ -123,7 +120,9 @@ app runRedis req = do
       case either of
         Left err -> res status500 [("Content-Type", "text/plain")] $ copyByteString BC.empty
         Right bs -> res status200 [("Content-Type", "text/plain")] $ mconcat $ map (copyByteString . flip BC.append newline) bs
-    _ -> return builderNoLen
+    _ -> do
+      liftIO $ putStrLn "PONG"
+      return builderNoLen
 
 noRedis :: Application
 noRedis req = return builderNoLen
@@ -153,17 +152,3 @@ ringPos bs = toWord64 lbs `xor` toWord64 rbs
 toWord64 :: BL.ByteString -> Word64
 toWord64 bs = BL.foldl' addShift 0 bs
   where addShift n y = (n `shiftL` 8) .|. fromIntegral y
-
-instance Integral Float where
-  quotRem a b = (fab, (ab - fab)*b)
-    where
-      ab = a/b
-      fab = floor ab
-  toInteger = floor
-
-instance Integral Double where
-  quotRem a b = (fab, (ab - fab)*b)
-    where
-      ab = a/b
-      fab = floor ab
-  toInteger = floor

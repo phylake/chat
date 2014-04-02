@@ -32,10 +32,10 @@ redis_server :: Int -> String
 redis_server i = intercalate " " args where
   args = [ "redis-server"
          , "--daemonize yes"
-         , "--port " ++ show (6379 + i)
-         , "--pidfile " ++ pidFile i
-         , "--dbfilename " ++ rdbFile i
-         , "--dir " ++ workingDir
+         , "--port", show (6379 + i)
+         , "--pidfile", pidFile i
+         , "--dbfilename", rdbFile i
+         , "--dir", workingDir
          ]
 
 kill :: Int -> IO ()

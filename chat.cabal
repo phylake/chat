@@ -16,7 +16,7 @@ executable chat
   main-is:             chat.hs
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base >=4.6 && <4.7
+  build-depends:       base >=4.6
                      , blaze-builder ==0.3.*
                      , bytestring ==0.*
                      , conduit ==1.*
